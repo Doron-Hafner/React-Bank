@@ -1,45 +1,77 @@
-import './App.css';
-import axios from 'axios'
-
 import React, { Component } from 'react'
-import Transactions from './components/Transactions';
-import Operations from './components/Operations';
+import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom'
+import Transactions from './components/Transactions'
+import TransactionManager from './components/TransactionManager'
+import Operations from './components/Operations'
+import Breakdown from './components/Breakdown'
+import Header from './components/Header'
+import 'fontsource-roboto';
+import { Typography, Container } from '@material-ui/core/'
+
 
 export default class App extends Component {
-  constructor(){
+  constructor() {
     super()
     this.state = {
-      transactions:
-      [
-        { amount: 3200, vendor: "Elevation", category: "Salary" },
-        { amount: -7, vendor: "Runescape", category: "Entertainment" },
-        { amount: -20, vendor: "Subway", category: "Food" },
-        { amount: -98, vendor: "La Baguetterie", category: "Food" }
-      ]
+      transactions: [],
+      redirect: false,
+      balance: 0,
+      catagoryList: [],
     }
   }
-  getBalance(){
+  componentDidMount = async () => {
+    const transactions = await TransactionManager.getTransactions()
+    const list = await TransactionManager.getCatagoryList()
+    this.setState({
+      transactions: transactions,
+      balance: this.getBalance(transactions),
+      catagoryList: list,
+    })
+  }
+
+  deleteTransaction = async (id) => {
+    await TransactionManager.deleteTransaction(id)
+    const transactions = await TransactionManager.getTransactions()
+    this.setState({
+      transactions: transactions,
+      balance: this.getBalance(transactions),
+    })
+  }
+
+  addTransaction = async (transaction) => {
+    await TransactionManager.addTransaction(transaction)
+    const transactions = await TransactionManager.getTransactions()
+    this.setState({
+      transactions: transactions,
+      redirect: true,
+      balance: this.getBalance(transactions),
+    })
+  }
+
+  getBalance = (transactions) => {
     let sumAmount = 0
-    this.state.transactions.forEach(t => sumAmount += t.amount)
-    return <div className='total-balance' >{sumAmount}</div>
+    transactions.forEach(t => sumAmount += t.amount)
+    return sumAmount
   }
-  addTransaction = (transaction) => {
-    const transactions = [...this.state.transactions]
-    transactions.push(transaction)
-      this.setState({ transactions: transactions })
+
+  redirect = () => {
+    this.setState({ redirect: false })
   }
-  deleteTransaction = (transactionId) => {
-    const transactions = [...this.state.transactions]
-    transactions.splice(transactionId, 1)
-    this.setState({ transactions: transactions })
-  }
+
   render() {
     return (
-      <div>
-        {this.getBalance()}
-        {<Transactions transactions={this.state.transactions} deleteTransaction={this.deleteTransaction} />}
-        {<Operations transactions={this.state.transactions} addTransaction={this.addTransaction} />}
-      </div>
+      <Container maxWidth='sm' style={{textAlign:'center'}}>
+        <Router>
+        <Header />
+        <Container> <Typography variant='h6' style={{ color: this.props.balance > 0 ? "limegreen" : "crimson" }}>Your current balance is {this.state.balance}</Typography> </Container>
+        <Switch>
+          <Route exact from="/transactions" render={() => <Transactions transactions={this.state.transactions} deleteTransaction={this.deleteTransaction} />} />
+          <Route exact path="/operations" render={() => (this.state.redirect ? <Redirect to="/transactions" /> :
+              <Operations addTransaction={this.addTransaction} redirect={this.redirect} />)} />
+          <Route exact path="/breakdown" render={() => <Breakdown catagory={this.state.catagoryList} />} />
+        </Switch>
+        </Router>
+      </Container>
     )
   }
 }

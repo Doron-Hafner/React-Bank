@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
+import '../App.css'
+import 'fontsource-roboto';
+import { TextField, Box, Button, ButtonGroup} from '@material-ui/core/'
 
 export default class Operations extends Component {
-    constructor(){
+    constructor() {
         super()
         this.state = {
             amount: '',
@@ -9,33 +12,45 @@ export default class Operations extends Component {
             catagory: ''
         }
     }
-    handleInput = e =>{
+    handleInput = e => {
         const value = e.target.value,
-        name = e.target.name
+            name = e.target.name
         this.setState({ [name]: value })
     }
     handleClick = (e) => {
-        e.target.value === 'withdraw' ?
-            this.setState({amount: Number(this.state.amount*(-1))},
-            () => this.props.addTransaction(this.state))
-            : this.props.addTransaction(this.state)
-        // this.setState({
-        //     amount: '',
-        //     vendor: '',
-        //     catagory: ''
-        // })
+        if (this.state.amount && this.state.vendor && this.state.catagory) {
+            let transaction = { ...this.state }
+            if (e.target.value === 'withdraw') {
+                transaction.amount = Number(transaction.amount * -1)
+                this.setState({ transaction: transaction }, () => this.props.addTransaction(this.state))
+            } else {
+                this.props.addTransaction(this.state);
+            }
+        }
     }
-    
+    componentWillUnmount() {
+        this.props.redirect()
+    }
+
     render() {
-        const amount = parseInt(this.state.amount) || ""
+        const vendor = this.state.vendor.replace(/[^a-zA-Z ]/, '')
+        const catagory = this.state.catagory.replace(/[^a-zA-Z ]/, '')
         return (
-            <div>
-                <input type="text" name="amount" value={amount} onChange={this.handleInput} />
-                <input type="text" name="vendor" value={this.state.vendor} onChange={this.handleInput} />
-                <input type="text" name="catagory" value={this.state.catagory} onChange={this.handleInput} />
-                <button onClick={this.handleClick} value='deposit'>Deposit</button>
-                <button onClick={this.handleClick} value='withdraw'>Withdraw</button>
-            </div>
+            <Box marginTop={5}>
+                <Box>
+                    <TextField type="number" name="amount" value={this.state.amount.replace(/-/g, '')} onChange={this.handleInput} placeholder='Amount'></TextField>
+                </Box>
+                <Box>
+                    <TextField type="text" name="vendor" value={vendor} onChange={this.handleInput} placeholder='Vendor'></TextField>
+                </Box>
+                <Box marginBottom={5}>
+                    <TextField type="text" name="catagory" value={catagory} onChange={this.handleInput} placeholder='Catagory'></TextField>
+                </Box>
+                <ButtonGroup disableElevation variant="contained">
+                    <Button onClick={this.handleClick} value='deposit' style={{backgroundColor:'limegreen' }}> Deposit</Button>
+                    <Button onClick={this.handleClick} value='withdraw' style={{backgroundColor:'crimson' }}>Withdraw </Button>
+                </ButtonGroup>
+            </Box>
         )
     }
 }
