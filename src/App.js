@@ -48,9 +48,9 @@ export default class App extends Component {
     })
   }
 
-  getBalance = (transactions) => {
+  getBalance = () => {
     let sumAmount = 0
-    transactions.forEach(t => sumAmount += t.amount)
+    this.state.transactions.forEach(t => sumAmount += t.amount)
     return sumAmount
   }
 
@@ -59,10 +59,11 @@ export default class App extends Component {
   }
 
   render() {
+    const balance =this.getBalance()
     return (
       <Router>
         <Header />
-        <Container style={{textAlign:'center'}}> <Typography variant='h6' style={{ color: this.props.balance > 0 ? "limegreen" : "crimson" }}>Your current balance is {this.state.balance}</Typography> </Container>
+        <Container style={{textAlign:'center'}}> <Typography variant='h6' style={{ color: balance > 0 ? "limegreen" : "crimson" }}>Your current balance is {balance}</Typography> </Container>
         <Switch>
           <Route exact from="/transactions" render={() => <Transactions transactions={this.state.transactions} deleteTransaction={this.deleteTransaction} />} />
           <Route exact path="/operations" render={() => (this.state.redirect ? <Redirect to="/transactions" /> :
