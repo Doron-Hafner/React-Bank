@@ -60,10 +60,9 @@ export default class App extends Component {
 
   render() {
     return (
-      <Container maxWidth='sm' style={{textAlign:'center'}}>
-        <Router>
+      <Router>
         <Header />
-        <Container> <Typography variant='h6' style={{ color: this.props.balance > 0 ? "limegreen" : "crimson" }}>Your current balance is {this.state.balance}</Typography> </Container>
+        <Container style={{textAlign:'center'}}> <Typography variant='h6' style={{ color: this.props.balance > 0 ? "limegreen" : "crimson" }}>Your current balance is {this.state.balance}</Typography> </Container>
         <Switch>
           <Route exact from="/transactions" render={() => <Transactions transactions={this.state.transactions} deleteTransaction={this.deleteTransaction} />} />
           <Route exact path="/operations" render={() => (this.state.redirect ? <Redirect to="/transactions" /> :
@@ -71,7 +70,6 @@ export default class App extends Component {
           <Route exact path="/breakdown" render={() => <Breakdown catagory={this.state.catagoryList} />} />
         </Switch>
         </Router>
-      </Container>
     )
   }
 }
